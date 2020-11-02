@@ -7,9 +7,9 @@
 ## Where to get it
 
 ## Dependencies
-* [Hello Sunil](https://hello-sunil.in)
-* [Hello Sunil](https://hello-sunil.in)
-* [Hello Sunil](https://hello-sunil.in)
+* [requests](https://github.com/psf/requests)
+* [pandas](https://github.com/pandas-dev/pandas)
+* [NumPy](https://github.com/numpy/numpy)
 
 ## License
 
