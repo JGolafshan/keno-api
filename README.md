@@ -3,6 +3,10 @@
 ## What is it?
 
 ## Main Features
+* Historial Data 
+* Realtime Jackpot's
+* Realtime Hot-Cold Number
+* Realtime Trends
 
 ## Where to get it
 
