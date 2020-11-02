@@ -25,4 +25,4 @@ kenoapi is Python package that provides data that is taken straight from the off
 *Documentation will be aavailable after the first release*
 
 ## Background
-
+This package has been published 
