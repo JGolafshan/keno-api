@@ -7,8 +7,8 @@
 ## Where to get it
 
 ## Dependencies
-* [requests](https://github.com/psf/requests)
-* [pandas](https://github.com/pandas-dev/pandas)
+* [Requests](https://github.com/psf/requests)
+* [Pandas](https://github.com/pandas-dev/pandas)
 * [NumPy](https://github.com/numpy/numpy)
 
 ## License
