@@ -96,7 +96,3 @@ class KenoAPI:
             start_game, number_of_games, date, max_per_page)
 
         return dict(requests.get(url).json())
-
-
-keno_test = KenoAPI()
-pprint(keno_test.historical_data())
