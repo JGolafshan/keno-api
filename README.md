@@ -19,7 +19,7 @@ kenoapi is Python package that provides data that is taken straight from the off
 * [NumPy](https://github.com/numpy/numpy)
 
 ## License
-[The Unlicense](https://github.com/psf/requests)
+[The Unlicense](https://github.com/JGolafshan/KenoAPI/blob/main/LICENSE)
 
 ## Documentation
 *Documentation will be aavailable after the first release*
