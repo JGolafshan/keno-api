@@ -30,6 +30,9 @@ class KenoAPI:
         else:
             return self.state
 
+    def fast_return(self, key=dict(), additonal_key=""):
+        return key.get(additonal_key)
+
     @property
     def transfrom_time(self):
         pass
@@ -63,19 +66,30 @@ class KenoAPI:
 
     def jackpot(self):
         url = self.get_url(end_point="/v2/info/jackpots", additonal_parms="")
-        retrieved = dict(requests.get(url).json())
+        retrieved = dict(requests.get(url).json())["jackpots"]
 
-        jackpot_list = {"ten_spot": retrieved.get("jackpots")["ten-spot"]["base"],
-                        "nine_spot": retrieved.get("jackpots")["nine-spot"]["base"],
-                        "eight_spot": retrieved.get("jackpots")["eight-spot"]["base"],
-                        "seven_spot": retrieved.get("jackpots")["seven-spot"]["base"],
-                        "ten_spot_mm": retrieved.get("jackpots")["ten-spot-mm"]["base"],
-                        "nine_spot_mm": retrieved.get("jackpots")["nine-spot-mm"]["base"],
-                        "eight_spot_mm": retrieved.get("jackpots")["eight-spot-mm"]["base"],
-                        "seven_spot_mm": retrieved.get("jackpots")["seven-spot-mm"]["base"]
-                        }
-        return jackpot_list
+        jackpot_regular = {
+            "ten_spot": self.fast_return(key=retrieved.get("ten-spot"), additonal_key="base"),
+            "nine_spot": self.fast_return(key=retrieved.get("nine-spot"), additonal_key="base"),
+            "eight_spot": self.fast_return(key=retrieved.get("eight-spot"), additonal_key="base"),
+            "seven_spot": self.fast_return(key=retrieved.get("seven-spot"), additonal_key="base")
+        }
 
+        jackpot_leveraged = {
+            "ten_spot": self.fast_return(key=retrieved.get("ten-spot-mm"), additonal_key="base"),
+            "nine_spot": self.fast_return(key=retrieved.get("nine-spot-mm"), additonal_key="base"),
+            "eight_spot": self.fast_return(key=retrieved.get("eight-spot-mm"), additonal_key="base"),
+            "seven_spot": self.fast_return(key=retrieved.get("seven-spot-mm"), additonal_key="base")
+        }
+
+        jackpot_combined = {
+            "regular": jackpot_regular,
+            "leveraged": jackpot_leveraged
+        }
+
+        return jackpot_combined
+
+    
     def hot_cold(self):
         url = self.get_url(end_point="/v2/info/hotCold", additonal_parms="")
         retrieved = dict(requests.get(url).json())
@@ -117,7 +131,3 @@ class KenoAPI:
                                               "heads", "tails", "winner"
                                               ])
         return df
-
-
-keno = KenoAPI()
-pprint(keno.historical_data())
