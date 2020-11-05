@@ -19,12 +19,12 @@ class KenoAPI:
 
     @property
     def state_redirect(self):
-        if self.state == self.states[4]:
+        if self.state.upper() == self.states[4]:
             print("Keno is not available in WA-Automaticly changed to NSW")
             self.state = self.states[2]
             return self.state
 
-        if self.state.upper() == self.states[5] or self.states[6] or self.states[7]:
+        if self.state.upper() == self.states[5] or self.state.upper() == self.states[6] or self.state.upper() == self.states[7]:
             self.state = self.states[0]
             return self.state
         else:
@@ -40,13 +40,15 @@ class KenoAPI:
     def game_status(self):
         url = self.get_url(end_point="/v2/games/kds", additonal_parms="")
         retrieved = dict(requests.get(url).json())
+        
 
-        status_current = {"time": retrieved.get("current")["closed"],
-                          "game_number": retrieved.get("current")["game-number"],
-                          "total_heads": retrieved.get("current")["variants"]["heads-or-tails"]["heads"],
-                          "total_tails": retrieved.get("current")["variants"]["heads-or-tails"]["tails"],
-                          "result": retrieved.get("current")["variants"]["heads-or-tails"]["result"]
-                          }
+        status_current = {
+            "time": retrieved.get("current")["closed"],
+            "game_number": retrieved.get("current")["game-number"],
+            "total_heads": retrieved.get("current")["variants"]["heads-or-tails"]["heads"],
+            "total_tails": retrieved.get("current")["variants"]["heads-or-tails"]["tails"],
+            "result": retrieved.get("current")["variants"]["heads-or-tails"]["result"]
+        }
 
         if retrieved.get("current")["_type"] == "application/vnd.tabcorp.keno.game.drawing":
             status_current.update({"complete_at": retrieved.get("current")["receivedDrawingAt"]})
@@ -54,11 +56,12 @@ class KenoAPI:
         if retrieved.get("current")["_type"] == "application/vnd.tabcorp.keno.game.complete":
             status_current.update({"complete_at": retrieved.get("current")["receivedCompleteAt"]})
 
-        status_selling = {"time": retrieved.get("selling")["closing"],
-                          "game_number": retrieved.get("selling")["game-number"],
-                          "time_opened": retrieved.get("selling")["opened"],
-                          "selling_at": retrieved.get("selling")["receivedSellingAt"]
-                          }
+        status_selling = {
+            "time": retrieved.get("selling")["closing"],
+            "game_number": retrieved.get("selling")["game-number"],
+            "time_opened": retrieved.get("selling")["opened"],
+            "selling_at": retrieved.get("selling")["receivedSellingAt"]
+        }
 
         status = {"current_game": status_current,
                   "next_game": status_selling}
@@ -89,7 +92,6 @@ class KenoAPI:
 
         return jackpot_combined
 
-    
     def hot_cold(self):
         url = self.get_url(end_point="/v2/info/hotCold", additonal_parms="")
         retrieved = dict(requests.get(url).json())
