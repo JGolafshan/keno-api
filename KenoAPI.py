@@ -24,7 +24,8 @@ class KenoAPI:
             self.state = self.states[2]
             return self.state
 
-        if self.state.upper() == self.states[5] or self.state.upper() == self.states[6] or self.state.upper() == self.states[7]:
+        if self.state.upper() == self.states[5] or self.state.upper() == self.states[6] or self.state.upper() == \
+                self.states[7]:
             self.state = self.states[0]
             return self.state
         else:
@@ -35,36 +36,27 @@ class KenoAPI:
 
     @property
     def transfrom_time(self):
-        pass
+        return None
 
     def game_status(self):
         url = self.get_url(end_point="/v2/games/kds", additonal_parms="")
         retrieved = dict(requests.get(url).json())
-        
 
         status_current = {
-            "time": retrieved.get("current")["closed"],
-            "game_number": retrieved.get("current")["game-number"],
-            "total_heads": retrieved.get("current")["variants"]["heads-or-tails"]["heads"],
-            "total_tails": retrieved.get("current")["variants"]["heads-or-tails"]["tails"],
-            "result": retrieved.get("current")["variants"]["heads-or-tails"]["result"]
+            "starting_time": self.fast_return(key=retrieved.get("current"), additonal_key="closed"),
+            "game_number": self.fast_return(key=retrieved.get("current"), additonal_key="game-number")
         }
-
-        if retrieved.get("current")["_type"] == "application/vnd.tabcorp.keno.game.drawing":
-            status_current.update({"complete_at": retrieved.get("current")["receivedDrawingAt"]})
-
-        if retrieved.get("current")["_type"] == "application/vnd.tabcorp.keno.game.complete":
-            status_current.update({"complete_at": retrieved.get("current")["receivedCompleteAt"]})
 
         status_selling = {
-            "time": retrieved.get("selling")["closing"],
-            "game_number": retrieved.get("selling")["game-number"],
-            "time_opened": retrieved.get("selling")["opened"],
-            "selling_at": retrieved.get("selling")["receivedSellingAt"]
+            "starting_time": self.fast_return(key=retrieved.get("selling"), additonal_key="closed"),
+            "game_number": self.fast_return(key=retrieved.get("selling"), additonal_key="game-number")
         }
 
-        status = {"current_game": status_current,
-                  "next_game": status_selling}
+        status = {
+            "current_game": status_current,
+            "next_game": status_selling
+        }
+
         return status
 
     def jackpot(self):
