@@ -1,5 +1,4 @@
-# Keno API - From Offical Keno Website
-## KenoAPI
+# Keno API - Unofficial Keno API
 
 ## What is it?
 kenoapi is Python package that provides data that is taken straight from the offical [Keno](https://www.keno.com.au/) website. it aims to provide insight into trending numbers, help user find historial patterns with ease using numpy and pandas, and monitor games in real-time. 
