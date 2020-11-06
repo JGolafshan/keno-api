@@ -31,7 +31,7 @@ class KenoAPI:
         else:
             return self.state
 
-    def fast_return(self, key=dict(), additonal_key=""):
+    def nested_dict(self, key=dict(), additonal_key=""):
         return key.get(additonal_key)
 
     @property
@@ -43,13 +43,13 @@ class KenoAPI:
         retrieved = dict(requests.get(url).json())
 
         status_current = {
-            "starting_time": self.fast_return(key=retrieved.get("current"), additonal_key="closed"),
-            "game_number": self.fast_return(key=retrieved.get("current"), additonal_key="game-number")
+            "starting_time": self.nested_dict(key=retrieved.get("current"), additonal_key="closed"),
+            "game_number": self.nested_dict(key=retrieved.get("current"), additonal_key="game-number")
         }
 
         status_selling = {
-            "starting_time": self.fast_return(key=retrieved.get("selling"), additonal_key="closed"),
-            "game_number": self.fast_return(key=retrieved.get("selling"), additonal_key="game-number")
+            "starting_time": self.nested_dict(key=retrieved.get("selling"), additonal_key="closed"),
+            "game_number": self.nested_dict(key=retrieved.get("selling"), additonal_key="game-number")
         }
 
         status = {
@@ -64,17 +64,17 @@ class KenoAPI:
         retrieved = dict(requests.get(url).json())["jackpots"]
 
         jackpot_regular = {
-            "ten_spot": self.fast_return(key=retrieved.get("ten-spot"), additonal_key="base"),
-            "nine_spot": self.fast_return(key=retrieved.get("nine-spot"), additonal_key="base"),
-            "eight_spot": self.fast_return(key=retrieved.get("eight-spot"), additonal_key="base"),
-            "seven_spot": self.fast_return(key=retrieved.get("seven-spot"), additonal_key="base")
+            "ten_spot": self.nested_dict(key=retrieved.get("ten-spot"), additonal_key="base"),
+            "nine_spot": self.nested_dict(key=retrieved.get("nine-spot"), additonal_key="base"),
+            "eight_spot": self.nested_dict(key=retrieved.get("eight-spot"), additonal_key="base"),
+            "seven_spot": self.nested_dict(key=retrieved.get("seven-spot"), additonal_key="base")
         }
 
         jackpot_leveraged = {
-            "ten_spot": self.fast_return(key=retrieved.get("ten-spot-mm"), additonal_key="base"),
-            "nine_spot": self.fast_return(key=retrieved.get("nine-spot-mm"), additonal_key="base"),
-            "eight_spot": self.fast_return(key=retrieved.get("eight-spot-mm"), additonal_key="base"),
-            "seven_spot": self.fast_return(key=retrieved.get("seven-spot-mm"), additonal_key="base")
+            "ten_spot": self.nested_dict(key=retrieved.get("ten-spot-mm"), additonal_key="base"),
+            "nine_spot": self.nested_dict(key=retrieved.get("nine-spot-mm"), additonal_key="base"),
+            "eight_spot": self.nested_dict(key=retrieved.get("eight-spot-mm"), additonal_key="base"),
+            "seven_spot": self.nested_dict(key=retrieved.get("seven-spot-mm"), additonal_key="base")
         }
 
         jackpot_combined = {
@@ -88,8 +88,8 @@ class KenoAPI:
         url = self.get_url(end_point="/v2/info/hotCold", additonal_parms="")
         retrieved = dict(requests.get(url).json())
 
-        hot_cold = {"cold_numbers": retrieved.get("coldNumbers"),
-                    "hot_numbers": retrieved.get("hotNumbers"),
+        hot_cold = {"cold": retrieved.get("coldNumbers"),
+                    "hot": retrieved.get("hotNumbers"),
                     "last_updated": retrieved.get("secondsSinceLastReceived")}
         return hot_cold
 
