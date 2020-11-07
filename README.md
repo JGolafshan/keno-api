@@ -11,6 +11,7 @@ kenoapi is Python package that provides data that is taken straight from the off
 * Real time Trends
 
 ## Where to get it
+*not currenly implemented *
 ```
 pypi code
 ```
