@@ -11,8 +11,12 @@ kenoapi is Python package that provides data that is taken straight from the off
 * Real time Trends
 
 ## Where to get it
-*This Project is currently under devoplement.*
-
+```
+pypi code
+```
+```
+npm code
+```
 ## Dependencies
 * [Requests](https://github.com/psf/requests)
 * [Pandas](https://github.com/pandas-dev/pandas)
