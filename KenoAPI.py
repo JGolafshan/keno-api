@@ -54,12 +54,14 @@ class KenoAPI:
         retrieved = dict(requests.get(url).json())
 
         status_current = {
-            "starting_time": self.transfrom_time(_datetime=self.nested_dict(key=retrieved.get("current"), additonal_key="closed")),
+            "starting_time": self.transfrom_time(
+                _datetime=self.nested_dict(key=retrieved.get("current"), additonal_key="closed")),
             "game_number": self.nested_dict(key=retrieved.get("current"), additonal_key="game-number")
         }
 
         status_selling = {
-            "starting_time": self.transfrom_time(_datetime=self.nested_dict(key=retrieved.get("selling"), additonal_key="closing")),
+            "starting_time": self.transfrom_time(
+                _datetime=self.nested_dict(key=retrieved.get("selling"), additonal_key="closing")),
             "game_number": self.nested_dict(key=retrieved.get("selling"), additonal_key="game-number")
         }
 
@@ -79,7 +81,7 @@ class KenoAPI:
         live_draw = {
             "game_number": retrieved.get("game-number"),
             "status": status_type,
-            "started_at": retrieved.get("closed"),
+            "started_at": self.transfrom_time(_datetime=retrieved.get("closed")),
             "is_finished": None,
             "draw_numbers": retrieved.get("draw"),
             "bonus": self.nested_dict(retrieved.get("variants"), additonal_key="bonus"),
@@ -133,7 +135,7 @@ class KenoAPI:
     def trends(self):
         pass
 
-    def historical_data(self, date="2020-10-30", start_game=900, number_of_games=20, max_per_page=20):
+    def historical_data(self, date="2020-10-30", start_game=600, number_of_games=20, max_per_page=20):
         # Max values = number_of_games=999, max_per_page=100
         url = self.get_url(end_point="/v2/info/history",
                            additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
@@ -142,7 +144,7 @@ class KenoAPI:
         data = []
         games = dict(requests.get(url).json())
         for item in games["items"]:
-            data.insert(0, [item["game-number"], item["closed"],
+            data.insert(0, [item["game-number"], self.transfrom_time(_datetime=item["closed"]),
                             item["draw"][0], item["draw"][1], item["draw"][2], item["draw"][3], item["draw"][4],
                             item["draw"][5], item["draw"][6], item["draw"][7], item["draw"][8], item["draw"][9],
                             item["draw"][10], item["draw"][11], item["draw"][12], item["draw"][13],
@@ -154,11 +156,9 @@ class KenoAPI:
                             ])
 
         data.reverse()
-        df = pd.DataFrame(data=data, columns=["game_number", "time",
-                                              "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7",
-                                              "ball-8", "ball-9", "ball-10", "ball-11", "ball-12", "ball-13",
-                                              "ball-14", "ball-15", "ball-16", "ball-17", "ball-18", "ball-19",
-                                              "ball-20",
-                                              "heads", "tails", "winner"
-                                              ])
+        df = pd.DataFrame(data=data, columns=[
+            "game_number", "time", "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7", "ball-8",
+            "ball-9", "ball-10", "ball-11", "ball-12", "ball-13", "ball-14", "ball-15", "ball-16", "ball-17", "ball-18",
+            "ball-19", "ball-20", "heads", "tails", "winner"
+        ])
         return df
