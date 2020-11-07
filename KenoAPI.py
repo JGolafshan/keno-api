@@ -1,7 +1,6 @@
-from pprint import pprint
-import requests
-import time
+import datetime
 import pandas as pd
+import requests
 
 
 class KenoAPI:
@@ -34,21 +33,33 @@ class KenoAPI:
     def nested_dict(self, key=dict(), additonal_key=""):
         return key.get(additonal_key)
 
-    @property
-    def transfrom_time(self):
-        return None
+    def transfrom_time(self, _datetime):
+        time_delta = _datetime.split("T")
+
+        date_dict = {
+            "year": int(time_delta[0][0:4]),
+            "month": int(time_delta[0][5:7]),
+            "day": int(time_delta[0][8:10]),
+            "hour": int(time_delta[1][0:2]),
+            "minute": int(time_delta[1][3:5]),
+            "second": int(time_delta[1][6:8]),
+        }
+
+        _datetime = datetime.datetime(date_dict.get("year"), date_dict.get("month"), date_dict.get("day"),
+                                      date_dict.get("hour"), date_dict.get("minute"), date_dict.get("second"))
+        return _datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
 
     def game_status(self):
         url = self.get_url(end_point="/v2/games/kds", additonal_parms="")
         retrieved = dict(requests.get(url).json())
 
         status_current = {
-            "starting_time": self.nested_dict(key=retrieved.get("current"), additonal_key="closed"),
+            "starting_time": self.transfrom_time(_datetime=self.nested_dict(key=retrieved.get("current"), additonal_key="closed")),
             "game_number": self.nested_dict(key=retrieved.get("current"), additonal_key="game-number")
         }
 
         status_selling = {
-            "starting_time": self.nested_dict(key=retrieved.get("selling"), additonal_key="closed"),
+            "starting_time": self.transfrom_time(_datetime=self.nested_dict(key=retrieved.get("selling"), additonal_key="closing")),
             "game_number": self.nested_dict(key=retrieved.get("selling"), additonal_key="game-number")
         }
 
@@ -58,6 +69,32 @@ class KenoAPI:
         }
 
         return status
+
+    def live_draw(self):
+        url = self.get_url(end_point="/v2/games/kds", additonal_parms="")
+        retrieved = dict(requests.get(url).json().get("current"))
+        status = str(retrieved.get("_type")).split(".")
+        status_type = status[-1]
+
+        live_draw = {
+            "game_number": retrieved.get("game-number"),
+            "status": status_type,
+            "started_at": retrieved.get("closed"),
+            "is_finished": None,
+            "draw_numbers": retrieved.get("draw"),
+            "bonus": self.nested_dict(retrieved.get("variants"), additonal_key="bonus"),
+            "heads": self.nested_dict(retrieved.get("variants"), additonal_key="heads-or-tails")["heads"],
+            "tails": self.nested_dict(retrieved.get("variants"), additonal_key="heads-or-tails")["tails"],
+            "result": self.nested_dict(retrieved.get("variants"), additonal_key="heads-or-tails")["result"]
+        }
+
+        if retrieved.get("_type") == "application/vnd.tabcorp.keno.game.complete":
+            live_draw.update({"is_finished": bool(True)})
+
+        else:
+            live_draw.update({"is_finished": bool(False)})
+
+        return live_draw
 
     def jackpot(self):
         url = self.get_url(end_point="/v2/info/jackpots", additonal_parms="")
