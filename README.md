@@ -22,6 +22,6 @@ kenoapi is Python package that provides data that is taken straight from the off
 [The Unlicense](https://github.com/JGolafshan/KenoAPI/blob/main/LICENSE)
 
 ## Documentation
-*[Repo Wiki / Documentation](https://github.com/JGolafshan/KenoAPI/wiki)*
+*[Wiki / Documentation](https://github.com/JGolafshan/KenoAPI/wiki)*
 
 ## Background
