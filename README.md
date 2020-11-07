@@ -27,6 +27,6 @@ npm code
 [The Unlicense](https://github.com/JGolafshan/KenoAPI/blob/main/LICENSE)
 
 ## Documentation
-*[Wiki / Documentation](https://github.com/JGolafshan/KenoAPI/wiki)*
+[Wiki / Documentation](https://github.com/JGolafshan/KenoAPI/wiki)
 
 ## Background
