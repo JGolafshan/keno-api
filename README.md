@@ -7,8 +7,9 @@ kenoAPI is Python package that provides data from the offical [Keno](https://www
 * Historical data.
 * Monitor Draws in real time.
 * Real-time Jackpot's.
-* Real-time Hot-Cold Number.
-* Real-time Trends.
+* Monitor Current Patterns
+Trends
+Hot And Cold Numbers
 
 ## Where to get it
 *not currenly implemented *
