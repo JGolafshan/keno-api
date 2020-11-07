@@ -6,9 +6,9 @@ kenoapi is Python package that provides data that is taken straight from the off
 ## Main Features
 * Historical data
 * Monitor Draws in real time
-* Real time Jackpot's
-* Real time Hot-Cold Number
-* Real time Trends
+* Real-time Jackpot's
+* Real-time Hot-Cold Number
+* Real-time Trends
 
 ## Where to get it
 *not currenly implemented *
