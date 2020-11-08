@@ -27,13 +27,17 @@ class KenoAPI:
                 self.states[7]:
             self.state = self.states[0]
             return self.state
+
         else:
             return self.state
 
     def nested_dict(self, key=dict(), additonal_key=""):
+        # Simple function to make adding values to key faster, efficient and easier to read.
         return key.get(additonal_key)
 
     def transfrom_time(self, _datetime):
+        # method made explicit  for Keno's datetime format, changes type(str) to type(datetime)
+        
         time_delta = _datetime.split("T")
 
         date_dict = {
