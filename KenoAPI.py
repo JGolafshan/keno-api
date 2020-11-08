@@ -18,6 +18,7 @@ class KenoAPI:
 
     @property
     def state_redirect(self):
+        # Checks state and redirect/ throw error if unavailable or in any way invalid.
         if self.state.upper() == self.states[4]:
             print("Keno is not available in WA-Automaticly changed to NSW")
             self.state = self.states[2]
@@ -37,7 +38,7 @@ class KenoAPI:
 
     def transfrom_time(self, _datetime):
         # method made explicit  for Keno's datetime format, changes type(str) to type(datetime)
-        
+
         time_delta = _datetime.split("T")
 
         date_dict = {
@@ -54,6 +55,7 @@ class KenoAPI:
         return _datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
 
     def game_status(self):
+        # Gets current and next game status and returns them as a nested dict.
         url = self.get_url(end_point="/v2/games/kds", additonal_parms="")
         retrieved = dict(requests.get(url).json())
 
@@ -77,6 +79,7 @@ class KenoAPI:
         return status
 
     def live_draw(self):
+        # Gets current live game, returned as dict.
         url = self.get_url(end_point="/v2/games/kds", additonal_parms="")
         retrieved = dict(requests.get(url).json().get("current"))
         status = str(retrieved.get("_type")).split(".")
@@ -103,6 +106,7 @@ class KenoAPI:
         return live_draw
 
     def jackpot(self):
+        # returns a nested dict. for jackpots
         url = self.get_url(end_point="/v2/info/jackpots", additonal_parms="")
         retrieved = dict(requests.get(url).json())["jackpots"]
 
@@ -128,6 +132,7 @@ class KenoAPI:
         return jackpot_combined
 
     def hot_cold(self):
+        # returns a dict. with hot and cold numbers as well as then it was last updated
         url = self.get_url(end_point="/v2/info/hotCold", additonal_parms="")
         retrieved = dict(requests.get(url).json())
 
@@ -137,9 +142,11 @@ class KenoAPI:
         return hot_cold
 
     def trends(self):
+        # view recent trends (drawn numbers, bonuses, heads or tails)
         pass
 
     def historical_data(self, date="2020-10-30", start_game=600, number_of_games=20, max_per_page=20):
+        # download historical data for x  amount of games, useful for the trends function
         # Max values = number_of_games=999, max_per_page=100
         url = self.get_url(end_point="/v2/info/history",
                            additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
