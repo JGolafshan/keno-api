@@ -5,13 +5,13 @@ import requests
 
 class KenoAPI:
     def __init__(self, state="NT"):
-        self.state = state
+        self.state = state.upper()
         self.states = ["ACT", 'NSW', "QLD", "VIC", "WA", "NT", "SA", "TAS"]
         self.base_url = "https://api-info-{}.keno.com.au".format(self.state_redirect.lower())
 
     def get_url(self, end_point="", additonal_parms=""):
         end_point = str(end_point)
-        params = "?jurisdiction={}".format(self.state_redirect.upper()) + additonal_parms
+        params = "?jurisdiction={}".format(self.state_redirect) + additonal_parms
         complete_url = self.base_url + end_point + params
 
         return str(complete_url)
@@ -19,13 +19,18 @@ class KenoAPI:
     @property
     def state_redirect(self):
         # Checks state and redirect/ throw error if unavailable or in any way invalid.
+
+        # Check if the state is value is found in the state list if it isn't throw an error and exit app
+        if any(x == self.state for x in self.states) is False:
+            return exit(str("Check state input: '{}' - is invalid").format(self.state))
+
         if self.state.upper() == self.states[4]:
             print("Keno is not available in WA-Automaticly changed to NSW")
             self.state = self.states[2]
             return self.state
 
-        if self.state.upper() == self.states[5] or self.state.upper() == self.states[6] or self.state.upper() == \
-                self.states[7]:
+        if self.state.upper() == self.states[5] or self.state.upper() == self.states[6] \
+                or self.state.upper() == self.states[7]:
             self.state = self.states[0]
             return self.state
 
@@ -33,7 +38,7 @@ class KenoAPI:
             return self.state
 
     def nested_dict(self, key=dict(), additonal_key=""):
-        # Simple function to make adding values to key faster, efficient and easier to read.
+        # Simple function to make getting/setting values, efficient and easier to read.
         return key.get(additonal_key)
 
     def transfrom_time(self, _datetime):
