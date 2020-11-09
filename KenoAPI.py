@@ -146,9 +146,13 @@ class KenoAPI:
                     "last_updated": retrieved.get("secondsSinceLastReceived")}
         return hot_cold
 
-    def trends(self):
-        # view recent trends (drawn numbers, bonuses, heads or tails)
-        pass
+    def trends(self, total_games):
+        date = datetime.date.today().strftime("%Y-%m-%d")
+        trends = self.historical_data(date=date,
+                                      start_game=self.game_status().get("current_game").get("game_number")-total_games,
+                                      number_of_games=total_games, max_per_page=100)
+
+        return trends
 
     def historical_data(self, date="2020-10-30", start_game=600, number_of_games=20, max_per_page=20):
         # download historical data for x  amount of games, useful for the trends function
