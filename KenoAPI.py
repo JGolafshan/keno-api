@@ -147,38 +147,46 @@ class KenoAPI:
         return hot_cold
 
     def trends(self, total_games):
-        date = datetime.date.today().strftime("%Y-%m-%d")
-        trends = self.historical_data(date=date,
-                                      start_game=self.game_status().get("current_game").get("game_number")-total_games,
-                                      number_of_games=total_games, max_per_page=100)
+        pass
 
-        return trends
+    def historical_data(self, start_date, end_date):
 
-    def historical_data(self, date="2020-10-30", start_game=600, number_of_games=20, max_per_page=20):
-        # download historical data for x  amount of games, useful for the trends function
-        # Max values = number_of_games=999, max_per_page=100
-        url = self.get_url(end_point="/v2/info/history",
-                           additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
-            start_game, number_of_games, date, max_per_page)
+        def fish_game_number():
+            # fish for a game number on the previews day, then calculate how many games until start_date (first game after 4am)
+            number_list = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 999]
+            for number in number_list:
+                url = self.get_url(end_point="/v2/info/history",
+                                   additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
+                    number, 1, start_date, 1)
+                retrieved = dict(requests.get(url).json())["items"]
 
-        data = []
-        games = dict(requests.get(url).json())
-        for item in games["items"]:
-            data.insert(0, [item["game-number"], self.transfrom_time(_datetime=item["closed"]),
-                            item["draw"][0], item["draw"][1], item["draw"][2], item["draw"][3], item["draw"][4],
-                            item["draw"][5], item["draw"][6], item["draw"][7], item["draw"][8], item["draw"][9],
-                            item["draw"][10], item["draw"][11], item["draw"][12], item["draw"][13],
-                            item["draw"][14], item["draw"][15], item["draw"][16], item["draw"][17],
-                            item["draw"][18], item["draw"][19],
-                            item["variants"]["heads-or-tails"]["heads"],
-                            item["variants"]["heads-or-tails"]["tails"],
-                            item["variants"]["heads-or-tails"]["result"]
-                            ])
+                if len(retrieved) is not 0:
+                    retrieved_game = {
+                        "game_number": retrieved[0]["game-number"],
+                        "closed_time": self.transfrom_time(_datetime=retrieved[0]["closed"])
+                    }
+                    return retrieved_game
 
-        data.reverse()
-        df = pd.DataFrame(data=data, columns=[
-            "game_number", "time", "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7", "ball-8",
-            "ball-9", "ball-10", "ball-11", "ball-12", "ball-13", "ball-14", "ball-15", "ball-16", "ball-17", "ball-18",
-            "ball-19", "ball-20", "heads", "tails", "winner"
-        ])
-        return df
+        def calculate_first_game():
+            # Get Game number after start at the start of the date (start_date)
+            # check if date is before start date if so + time
+
+            # else minus time
+
+            # then divied buy game time
+            # then return game_number
+
+            pass
+
+        def calculate_days():
+            start = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+            end = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+            time_delta = abs(end - start).days
+            return time_delta
+
+        for day in range(calculate_days()):
+            fish_game_number()
+            # for page in pages:
+            # GET URL - GAME_NUMBER, NUMBER OF GAME == 999 - GAME NUMBER)
+            # append to data
+        # get next days first game
