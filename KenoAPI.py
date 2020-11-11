@@ -1,6 +1,7 @@
 import datetime
 import pandas as pd
 import requests
+import math
 
 
 class KenoAPI:
@@ -37,11 +38,13 @@ class KenoAPI:
         else:
             return self.state
 
-    def nested_dict(self, key=dict(), additonal_key=""):
+    @staticmethod
+    def nested_dict(key={}, additonal_key=""):
         # Simple function to make getting/setting values, efficient and easier to read.
         return key.get(additonal_key)
 
-    def transfrom_time(self, _datetime):
+    @staticmethod
+    def transfrom_time(_datetime):
         # method made explicit  for Keno's datetime format, changes type(str) to type(datetime)
 
         time_delta = _datetime.split("T")
@@ -147,46 +150,95 @@ class KenoAPI:
         return hot_cold
 
     def trends(self, total_games):
-        pass
+        date = datetime.date.today().strftime("%Y-%m-%d")
+        trends = self.historical_data(date=date,
+                                      start_game=self.game_status().get("current_game").get(
+                                          "game_number") - total_games,
+                                      number_of_games=total_games, max_per_page=100)
 
-    def historical_data(self, start_date, end_date):
+        return trends
 
-        def fish_game_number():
-            # fish for a game number on the previews day, then calculate how many games until start_date (first game after 4am)
-            number_list = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 999]
-            for number in number_list:
-                url = self.get_url(end_point="/v2/info/history",
-                                   additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
-                    number, 1, start_date, 1)
-                retrieved = dict(requests.get(url).json())["items"]
+    def historical_data_new(self, start_date, end_date):
 
-                if len(retrieved) is not 0:
-                    retrieved_game = {
-                        "game_number": retrieved[0]["game-number"],
-                        "closed_time": self.transfrom_time(_datetime=retrieved[0]["closed"])
-                    }
-                    return retrieved_game
+        def get_daily_info(increase=int(1)):
 
-        def calculate_first_game():
-            # Get Game number after start at the start of the date (start_date)
-            # check if date is before start date if so + time
+            def daily_date(day=increase):
+                og_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+                modified_date = og_date + datetime.timedelta(days=day)
+                return modified_date
 
-            # else minus time
+            def fish_for_number():
+                # fish for a game number on the previews day, then calculate how many games until start_date (first game after 4am)
+                number_list = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 999]
+                for number in number_list:
+                    url = self.get_url(end_point="/v2/info/history",
+                                       additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
+                        number, 1, daily_date(), 1)
+                    retrieved = dict(requests.get(url).json())["items"]
 
-            # then divied buy game time
-            # then return game_number
+                    if len(retrieved) is not 0:
+                        return {
+                            "game_number": retrieved[0]["game-number"],
+                            "closed_time": self.transfrom_time(_datetime=retrieved[0]["closed"])
+                        }
 
-            pass
+            def calculate_first_game():
+                first_date = datetime.datetime.strptime(fish_for_number().get("closed_time"), "%Y-%m-%d %H:%M:%S.%f")
+                last_date = datetime.datetime(daily_date(increase).year, daily_date(increase).month,
+                                              daily_date(increase).day, 12)
 
-        def calculate_days():
-            start = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-            end = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-            time_delta = abs(end - start).days
-            return time_delta
+                games = (last_date - first_date).seconds
+                games = int(round(games / 160, 0))
+                return games
 
-        for day in range(calculate_days()):
-            fish_game_number()
-            # for page in pages:
-            # GET URL - GAME_NUMBER, NUMBER OF GAME == 999 - GAME NUMBER)
-            # append to data
-        # get next days first game
+            def calculate_days():
+                start = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+                end = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+                time_delta = abs(end - start).days
+                return time_delta
+
+            def calculate_games():
+                time = (24 * 60) * 60
+                return int(math.ceil(time / 160))
+
+            dict_ = {
+                "search_date": daily_date(day=increase).strftime("%Y-%m-%d"),
+                "first_number": fish_for_number().get("game_number"),
+                "first_number_date": fish_for_number().get("closed_time"),
+                "increase_needed": calculate_first_game(),
+                "total_days": calculate_days()
+            }
+
+            dict_.update({"start_game": int(dict_["first_number"] + dict_["increase_needed"])})
+            return dict_
+
+        games = 100
+        per_page = 100
+        data = []
+        for day in range(get_daily_info().get("total_days")):
+            info = get_daily_info(increase=day)
+
+            url_ = self.get_url(end_point="/v2/info/history",
+                                additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
+                info.get("start_game"), games, info.get("search_date"), per_page)
+            games_ = dict(requests.get(url_).json())
+            for item in games_["items"]:
+                data.insert(0, [item["game-number"], item["closed"],
+                                item["draw"][0], item["draw"][1], item["draw"][2], item["draw"][3], item["draw"][4],
+                                item["draw"][5], item["draw"][6], item["draw"][7], item["draw"][8], item["draw"][9],
+                                item["draw"][10], item["draw"][11], item["draw"][12], item["draw"][13],
+                                item["draw"][14], item["draw"][15], item["draw"][16], item["draw"][17],
+                                item["draw"][18], item["draw"][19],
+                                item["variants"]["heads-or-tails"]["heads"],
+                                item["variants"]["heads-or-tails"]["tails"],
+                                item["variants"]["heads-or-tails"]["result"]
+                                ])
+
+        df = pd.DataFrame(data=data, columns=[
+            "game_number", "time", "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7",
+            "ball-8",
+            "ball-9", "ball-10", "ball-11", "ball-12", "ball-13", "ball-14", "ball-15", "ball-16", "ball-17",
+            "ball-18",
+            "ball-19", "ball-20", "heads", "tails", "winner"
+         ])
+        return df
