@@ -162,13 +162,12 @@ class KenoAPI:
 
         def get_daily_info(increase=int(1)):
 
-            def daily_date(day=increase):
+            def daily_date(_day=increase):
                 og_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-                modified_date = og_date + datetime.timedelta(days=day)
+                modified_date = og_date + datetime.timedelta(days=_day)
                 return modified_date
 
             def fish_for_number():
-                # fish for a game number on the previews day, then calculate how many games until start_date (first game after 4am)
                 number_list = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 999]
                 for number in number_list:
                     url = self.get_url(end_point="/v2/info/history",
@@ -187,9 +186,9 @@ class KenoAPI:
                 last_date = datetime.datetime(daily_date(increase).year, daily_date(increase).month,
                                               daily_date(increase).day, 12)
 
-                games = (last_date - first_date).seconds
-                games = int(round(games / 160, 0))
-                return games
+                _games = (last_date - first_date).seconds
+                _games = int(round(_games / 160, 0))
+                return _games
 
             def calculate_days():
                 start = datetime.datetime.strptime(end_date, "%Y-%m-%d")
@@ -202,14 +201,16 @@ class KenoAPI:
                 return int(math.ceil(time / 160))
 
             dict_ = {
-                "search_date": daily_date(day=increase).strftime("%Y-%m-%d"),
+                "search_date": daily_date(_day=increase).strftime("%Y-%m-%d"),
                 "first_number": fish_for_number().get("game_number"),
                 "first_number_date": fish_for_number().get("closed_time"),
                 "increase_needed": calculate_first_game(),
-                "total_days": calculate_days()
+                "total_days": calculate_days(),
+                "total_games": calculate_games()
             }
 
             dict_.update({"start_game": int(dict_["first_number"] + dict_["increase_needed"])})
+            dict_.update({"total_pages": int(math.ceil(dict_["total_games"] / 100))})
             return dict_
 
         games = 100
@@ -218,21 +219,22 @@ class KenoAPI:
         for day in range(get_daily_info().get("total_days")):
             info = get_daily_info(increase=day)
 
-            url_ = self.get_url(end_point="/v2/info/history",
-                                additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
-                info.get("start_game"), games, info.get("search_date"), per_page)
-            games_ = dict(requests.get(url_).json())
-            for item in games_["items"]:
-                data.insert(0, [item["game-number"], item["closed"],
-                                item["draw"][0], item["draw"][1], item["draw"][2], item["draw"][3], item["draw"][4],
-                                item["draw"][5], item["draw"][6], item["draw"][7], item["draw"][8], item["draw"][9],
-                                item["draw"][10], item["draw"][11], item["draw"][12], item["draw"][13],
-                                item["draw"][14], item["draw"][15], item["draw"][16], item["draw"][17],
-                                item["draw"][18], item["draw"][19],
-                                item["variants"]["heads-or-tails"]["heads"],
-                                item["variants"]["heads-or-tails"]["tails"],
-                                item["variants"]["heads-or-tails"]["result"]
-                                ])
+            for page in range(1, info.get("total_pages")):
+                url_ = self.get_url(end_point="/v2/info/history",
+                                    additonal_parms="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number={}").format(
+                    info.get("start_game"), games, info.get("search_date"), per_page, page)
+                games_ = dict(requests.get(url_).json())
+                for item in games_["items"]:
+                    data.insert(0, [item["game-number"], item["closed"],
+                                    item["draw"][0], item["draw"][1], item["draw"][2], item["draw"][3], item["draw"][4],
+                                    item["draw"][5], item["draw"][6], item["draw"][7], item["draw"][8], item["draw"][9],
+                                    item["draw"][10], item["draw"][11], item["draw"][12], item["draw"][13],
+                                    item["draw"][14], item["draw"][15], item["draw"][16], item["draw"][17],
+                                    item["draw"][18], item["draw"][19],
+                                    item["variants"]["heads-or-tails"]["heads"],
+                                    item["variants"]["heads-or-tails"]["tails"],
+                                    item["variants"]["heads-or-tails"]["result"]
+                                    ])
 
         df = pd.DataFrame(data=data, columns=[
             "game_number", "time", "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7",
@@ -240,5 +242,5 @@ class KenoAPI:
             "ball-9", "ball-10", "ball-11", "ball-12", "ball-13", "ball-14", "ball-15", "ball-16", "ball-17",
             "ball-18",
             "ball-19", "ball-20", "heads", "tails", "winner"
-         ])
+        ])
         return df
