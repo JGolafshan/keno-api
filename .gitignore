@@ -1,2 +1,4 @@
 /venv/
 /.idea/
+*.txt
+keno_api.egg-info/PKG-INFO
