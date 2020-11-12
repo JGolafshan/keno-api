@@ -3,5 +3,6 @@
 /keno_api.egg-info/
 /__pycache__/
 /.idea/
+/.github/
 *.txt
 keno_api.egg-info/PKG-INFO
