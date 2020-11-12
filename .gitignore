@@ -1,5 +1,6 @@
 /venv/
 /.idea/
+/keno_api.egg-info/
 /__pycache__/
 /.idea/
 *.txt
