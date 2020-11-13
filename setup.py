@@ -1,29 +1,21 @@
-from setuptools import setup
+import setuptools
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
-
-
-setup(name='keno-api',
-      version='0.1',
-      description='Unofficial Keno API - For Australia',
-      long_description=readme(),
-      url='https://github.com/JGolafshan/KenoAPI',
-      author='Joshua David Golafshan',
-      author_email='NAN',
-      license='Unlicense Licensei',
-      install_requires=[
-          'datetime',
-          'pandas',
-          'requests',
-          'math',
-      ],
-      scripts=[],
-      keywords='keno keno-api australia ',
-      packages=['grandmasomsri'],
-      package_dir={'keno-api': 'src/keno'},
-      package_data={'': ['']
-                    },
-      )
+setuptools.setup(
+    name="keno-api",  # Replace with your own username
+    version="0.0.2",
+    author="Joshua David Golafshan",
+    author_email="author@example.com",
+    description="an educational package for educational uses only",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/JGolafshan/KenoAPI",
+    packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+    ],
+    python_requires='>=3.6',
+)

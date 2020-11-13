@@ -6,3 +6,5 @@
 /.github/
 *.txt
 keno_api.egg-info/PKG-INFO
+dist/keno-api-0.0.1.tar.gz
+*.gz
