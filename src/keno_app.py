@@ -85,6 +85,7 @@ class RealTime(KenoAPI):
         }
 
         status = {
+            "state": self.state,
             "current_game": status_current,
             "next_game": status_selling
         }
@@ -99,6 +100,7 @@ class RealTime(KenoAPI):
         status_type = status[-1]
 
         live_draw = {
+            "state": self.state,
             "game_number": retrieved.get("game-number"),
             "status": status_type,
             "started_at": self.transform_time(_datetime=retrieved.get("closed")),
@@ -138,6 +140,7 @@ class RealTime(KenoAPI):
         }
 
         jackpot_combined = {
+            "state": self.state,
             "regular": jackpot_regular,
             "leveraged": jackpot_leveraged
         }
@@ -151,7 +154,8 @@ class RealTime(KenoAPI):
 
         hot_cold = {"cold": retrieved.get("coldNumbers"),
                     "hot": retrieved.get("hotNumbers"),
-                    "last_updated": retrieved.get("secondsSinceLastReceived")}
+                    "last_updated": retrieved.get("secondsSinceLastReceived"),
+                    "state": self.state}
         return hot_cold
 
 
@@ -165,7 +169,7 @@ class HistoricalData(KenoAPI):
     def __test(self):
         pass
 
-    def historical_data_new(self, start_date, end_date):
+    def historical_data(self, start_date, end_date):
 
         def get_daily_info(increase=int(1)):
 
