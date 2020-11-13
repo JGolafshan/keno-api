@@ -5,17 +5,29 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="keno-api",  # Replace with your own username
-    version="0.0.2",
+    version="0.0.17",
     author="Joshua David Golafshan",
     author_email="author@example.com",
     description="an educational package for educational uses only",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/JGolafshan/KenoAPI",
-    packages=setuptools.find_packages(),
+    packages=['src'],
+    install_requires=[
+        'datetime',
+        'pandas',
+        'requests',
+    ],
+    package_dir={'keno': 'src'},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
-    ],
-    python_requires='>=3.6',
+    ]
 )
+
+
+"""
+1: python setup.py sdist
+2: twine upload --skip-existing dist/*
+
+"""

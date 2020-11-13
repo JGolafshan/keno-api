@@ -8,7 +8,7 @@ class KenoAPI:
     def __init__(self, state="NT"):
         self.state = state.upper()
         self.states = ["ACT", 'NSW', "QLD", "VIC", "WA", "NT", "SA", "TAS"]
-        self.base_url = "https://api-info-{}.keno.com.au".format(self.state_redirect.lower())
+        self.base_url = "https://api-info-{}.src.com.au".format(self.state_redirect.lower())
 
     def get_url(self, end_point="", additonal_parms=""):
         end_point = str(end_point)
@@ -105,7 +105,7 @@ class KenoAPI:
             "result": self.nested_dict(retrieved.get("variants"), additonal_key="heads-or-tails")["result"]
         }
 
-        if retrieved.get("_type") == "application/vnd.tabcorp.keno.game.complete":
+        if retrieved.get("_type") == "application/vnd.tabcorp.src.game.complete":
             live_draw.update({"is_finished": bool(True)})
 
         else:
