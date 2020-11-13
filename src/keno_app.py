@@ -64,8 +64,8 @@ class KenoAPI:
 
 
 class RealTime(KenoAPI):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, state):
+        super().__init__(state)
 
     def game_status(self):
         # Gets current and next game status and returns them as a nested dict.
@@ -160,8 +160,8 @@ class RealTime(KenoAPI):
 
 
 class HistoricalData(KenoAPI):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, state):
+        super().__init__(state)
 
     def trends(self, total_games):
         pass
@@ -255,3 +255,8 @@ class HistoricalData(KenoAPI):
             "ball-19", "ball-20", "heads", "tails", "winner"
         ])
         return df
+
+
+keno = RealTime(state="NSW")
+
+print(keno.live_draw())
