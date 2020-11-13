@@ -8,3 +8,6 @@
 keno_api.egg-info/PKG-INFO
 dist/keno-api-0.0.1.tar.gz
 *.gz
+src_api.egg-info/PKG-INFO
+*.pyc
+src_api.egg-info/PKG-INFO
