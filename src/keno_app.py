@@ -187,7 +187,6 @@ class HistoricalData(KenoAPI):
     def __calculate_first_game(self):
         pass
 
-                    if len(retrieved) is not 0:
     def __calculate_days(self):
         start = datetime.datetime.strptime(self.end_date, "%Y-%m-%d")
         end = datetime.datetime.strptime(self.start_date, "%Y-%m-%d")
