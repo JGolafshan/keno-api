@@ -157,7 +157,7 @@ class RealTime(KenoAPI):
         return hot_cold
 
 
-"""class HistoricalData(KenoAPI):
+class HistoricalData(KenoAPI):
     def __init__(self, state=None, start_date=None, end_date=None):
         super().__init__(state)
         self.start_date = start_date
@@ -174,13 +174,11 @@ class RealTime(KenoAPI):
         pass
 
     def historical_data(self):
-        for day in range(self.__calculate_days()):
-            get_game = self.__fish_game_number(date=self.__increment_date(day))
-            print(get_game)
+        pass
 
     # ------------- Private Methods -------------
 
 
 keno = HistoricalData(state="nsw", start_date="2020-03-20", end_date="2020-04-20")
 
-print(keno.historical_data())"""
+print(keno.historical_data())
