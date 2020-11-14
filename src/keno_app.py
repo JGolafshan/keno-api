@@ -160,103 +160,49 @@ class RealTime(KenoAPI):
 
 
 class HistoricalData(KenoAPI):
-    def __init__(self, state):
+    def __init__(self, state=None, start_date=None, end_date=None):
         super().__init__(state)
+        self.start_date = start_date
+        self.end_date = end_date
 
-    def trends(self, total_games):
+    # ------------- Callable Methods -------------
+
+    def recent_trends(self, total_games):
         pass
 
-    def __test(self):
+    def historical_data(self):
+        for day in range(self.__calculate_days()):
+            print(self.__increment_date(increase=day))
+
+    # ------------- Private Methods -------------
+
+    def __increment_date(self, increase):
+        og_date = datetime.datetime.strptime(self.start_date, "%Y-%m-%d")
+        modified_date = og_date + datetime.timedelta(days=increase)
+        return modified_date
+
+    def __fish_game_number(self):
         pass
 
-    def historical_data(self, start_date, end_date):
-
-        def get_daily_info(increase=int(1)):
-
-            def daily_date(_day=increase):
-                og_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-                modified_date = og_date + datetime.timedelta(days=_day)
-                return modified_date
-
-            def fish_for_number():
-                number_list = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 999]
-                for number in number_list:
-                    url = self.get_url(end_point="/v2/info/history",
-                                       additional_params="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number=1").format(
-                        number, 1, daily_date(), 1)
-                    retrieved = dict(requests.get(url).json())["items"]
+    def __calculate_first_game(self):
+        pass
 
                     if len(retrieved) is not 0:
-                        return {
-                            "game_number": retrieved[0]["game-number"],
-                            "closed_time": self.transform_time(_datetime=retrieved[0]["closed"])
-                        }
+    def __calculate_days(self):
+        start = datetime.datetime.strptime(self.end_date, "%Y-%m-%d")
+        end = datetime.datetime.strptime(self.start_date, "%Y-%m-%d")
+        time_delta = abs(end - start).days
+        return time_delta
 
-            def calculate_first_game():
-                first_date = datetime.datetime.strptime(fish_for_number().get("closed_time"), "%Y-%m-%d %H:%M:%S.%f")
-                last_date = datetime.datetime(daily_date(increase).year, daily_date(increase).month,
-                                              daily_date(increase).day, 12)
+    def __calculate_games(self):
+        # apply more programmatic style to getting the time difference between games
+        time = (24 * 60) * 60
+        return int(math.ceil(time / 160))
 
-                _games = (last_date - first_date).seconds
-                _games = int(round(_games / 160, 0))
-                return _games
-
-            def calculate_days():
-                start = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-                end = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-                time_delta = abs(end - start).days
-                return time_delta
-
-            def calculate_games():
-                time = (24 * 60) * 60
-                return int(math.ceil(time / 160))
-
-            dict_ = {
-                "search_date": daily_date(_day=increase).strftime("%Y-%m-%d"),
-                "first_number": fish_for_number().get("game_number"),
-                "first_number_date": fish_for_number().get("closed_time"),
-                "increase_needed": calculate_first_game(),
-                "total_days": calculate_days(),
-                "total_games": calculate_games()
-            }
-
-            dict_.update({"start_game": int(dict_["first_number"] + dict_["increase_needed"])})
-            dict_.update({"total_pages": int(math.ceil(dict_["total_games"] / 100))})
-            return dict_
-
-        games = 100
-        per_page = 100
-        data = []
-        for day in range(get_daily_info().get("total_days")):
-            info = get_daily_info(increase=day)
-
-            for page in range(1, info.get("total_pages")):
-                url_ = self.get_url(end_point="/v2/info/history",
-                                    additional_params="&starting_game_number={}&number_of_games={}&date={}&page_size={}&page_number={}").format(
-                    info.get("start_game"), games, info.get("search_date"), per_page, page)
-                games_ = dict(requests.get(url_).json())
-                for item in games_["items"]:
-                    data.insert(0, [item["game-number"], item["closed"],
-                                    item["draw"][0], item["draw"][1], item["draw"][2], item["draw"][3], item["draw"][4],
-                                    item["draw"][5], item["draw"][6], item["draw"][7], item["draw"][8], item["draw"][9],
-                                    item["draw"][10], item["draw"][11], item["draw"][12], item["draw"][13],
-                                    item["draw"][14], item["draw"][15], item["draw"][16], item["draw"][17],
-                                    item["draw"][18], item["draw"][19],
-                                    item["variants"]["heads-or-tails"]["heads"],
-                                    item["variants"]["heads-or-tails"]["tails"],
-                                    item["variants"]["heads-or-tails"]["result"]
-                                    ])
-
-        df = pd.DataFrame(data=data, columns=[
-            "game_number", "time", "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7",
-            "ball-8",
-            "ball-9", "ball-10", "ball-11", "ball-12", "ball-13", "ball-14", "ball-15", "ball-16", "ball-17",
-            "ball-18",
-            "ball-19", "ball-20", "heads", "tails", "winner"
-        ])
-        return df
+    def __df_conversion(self):
+        pass
 
 
-keno = RealTime(state="NSW")
+keno = HistoricalData(state="nsw", start_date="2020-03-20", end_date="2020-04-20")
 
-print(keno.live_draw())
+print(keno.historical_data())
