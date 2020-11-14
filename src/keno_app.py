@@ -3,8 +3,6 @@ import pandas as pd
 import requests
 import math
 
-x = pd.DataFrame(None, None)
-
 
 class KenoAPI:
     def __init__(self, state="NT"):
@@ -161,7 +159,7 @@ class RealTime(KenoAPI):
         return hot_cold
 
 
-class HistoricalData(KenoAPI):
+"""class HistoricalData(KenoAPI):
     def __init__(self, state=None, start_date=None, end_date=None):
         super().__init__(state)
         self.start_date = start_date
@@ -179,62 +177,12 @@ class HistoricalData(KenoAPI):
 
     def historical_data(self):
         for day in range(self.__calculate_days()):
-            for page in range(1, 10):
-                pass
-                # Check game number range if number passes
-                for games in range(self.__games_range()):
-                    # url
-                    # append to data
-                    pass
+            get_game = self.__fish_game_number(date=self.__increment_date(day))
+            print(get_game)
 
     # ------------- Private Methods -------------
-
-    def __increment_date(self, increase):
-        og_date = datetime.datetime.strptime(self.start_date, "%Y-%m-%d")
-        modified_date = og_date + datetime.timedelta(days=increase)
-        return modified_date
-
-    def __fish_game_number(self, date):
-        number_list = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 999]
-        for number in number_list:
-            url = self.get_url(end_point="/v2/info/history",
-                               additional_params="&starting_game_number={}&number_of_games={}&date={}&page_size=20&page_number=1").format(
-                number, 1, date)
-            retrieved = dict(requests.get(url).json())["items"]
-
-            if len(retrieved) is not 0:
-                return {
-                    "game_number": retrieved[0]["game-number"],
-                    "closed_time": self.transform_time(_datetime=retrieved[0]["closed"])
-                }
-
-    def __calculate_first_game(self):
-        pass
-
-    def __calculate_days(self):
-        start = datetime.datetime.strptime(self.end_date, "%Y-%m-%d")
-        end = datetime.datetime.strptime(self.start_date, "%Y-%m-%d")
-        time_delta = abs(end - start).days
-        return time_delta
-
-    def __calculate_games(self):
-        # apply more programmatic style to getting the time difference between games
-        time = (24 * 60) * 60
-        return int(math.ceil(time / 160))
-
-    def __games_range(self):
-        return 10
-
-    def __df_conversion(self, selected_data):
-        return pd.DataFrame(data=selected_data, columns=[
-            "game_number", "time", "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7",
-            "ball-8",
-            "ball-9", "ball-10", "ball-11", "ball-12", "ball-13", "ball-14", "ball-15", "ball-16", "ball-17",
-            "ball-18",
-            "ball-19", "ball-20", "heads", "tails", "winner"
-        ])
 
 
 keno = HistoricalData(state="nsw", start_date="2020-03-20", end_date="2020-04-20")
 
-print(keno.historical_data())
+print(keno.historical_data())"""
