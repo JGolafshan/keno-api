@@ -11,7 +11,7 @@ kenoAPI is Python package that provides data from the offical [Keno](https://www
 
 ## Where to get it
 ```
-pip install keno-api
+pip install kenoAPI
 ```
 
 ## Dependencies

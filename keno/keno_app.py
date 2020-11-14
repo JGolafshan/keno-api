@@ -1,8 +1,6 @@
 import datetime
 import pandas as pd
 import requests
-import math
-
 
 class KenoAPI:
     def __init__(self, state="NT"):
