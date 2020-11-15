@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="kenoAPI",
-    version="1.1.0",
+    version="2.0.0",
     author="Joshua David Golafshan",
     description="Python-based API used to fetch real-time and historical data from the Australian Keno website.",
     # long_description=long_description,
