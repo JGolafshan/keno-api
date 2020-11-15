@@ -2,6 +2,7 @@ import datetime
 import pandas as pd
 import requests
 
+
 class KenoAPI:
     def __init__(self, state="NT"):
         self.state = state.upper()
@@ -167,18 +168,48 @@ class HistoricalData(KenoAPI):
     # ------------- Callable Methods -------------
 
     def recent_trends(self, look_back=None):
-        # get current game
-        # go back
-        # url
-        # append data to df
-        pass
+        current_game = RealTime(state="NSW").game_status().get("current_game")
+        get_date = current_game.get("starting_time").split(" ")[0]
+        get_game_number = current_game.get("game_number")
+        start_game = get_game_number - look_back
+
+        url = self.get_url(end_point="/v2/info/history",
+                           additional_params="&starting_game_number={}&number_of_games={}&date={}&page_size=100&page_number=1").format(
+            start_game, int(look_back), get_date)
+        games_ = requests.get(url).json()
+
+        self.__append_data(selected_data=games_)
+        return self.__df_conversion(selected_data=self.data)
 
     def historical_data(self):
         pass
 
     # ------------- Private Methods -------------
 
+    def __append_data(self, selected_data):
+        for item in selected_data["items"]:
+            self.data.insert(0, [item["game-number"], item["closed"],
+                                 item["draw"][0], item["draw"][1], item["draw"][2], item["draw"][3], item["draw"][4],
+                                 item["draw"][5], item["draw"][6], item["draw"][7], item["draw"][8], item["draw"][9],
+                                 item["draw"][10], item["draw"][11], item["draw"][12], item["draw"][13],
+                                 item["draw"][14], item["draw"][15], item["draw"][16], item["draw"][17],
+                                 item["draw"][18], item["draw"][19],
+                                 item["variants"]["heads-or-tails"]["heads"],
+                                 item["variants"]["heads-or-tails"]["tails"],
+                                 item["variants"]["heads-or-tails"]["result"]
+                                 ])
+        return self.data
 
-keno = HistoricalData(state="nsw", start_date="2020-03-20", end_date="2020-04-20")
+    def __df_conversion(self, selected_data):
+        return pd.DataFrame(data=selected_data, columns=[
+            "game_number", "time", "ball-1", "ball-2", "ball-3", "ball-4", "ball-5", "ball-6", "ball-7",
+            "ball-8",
+            "ball-9", "ball-10", "ball-11", "ball-12", "ball-13", "ball-14", "ball-15", "ball-16", "ball-17",
+            "ball-18",
+            "ball-19", "ball-20", "heads", "tails", "winner"
+        ])
 
-print(keno.historical_data())
+
+app = HistoricalData(state="nsw", start_date=None, end_date=None)
+
+pprint(app.recent_trends(look_back=10))

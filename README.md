@@ -17,11 +17,11 @@ pip install kenoAPI
 ## Dependencies
 * [Requests](https://github.com/psf/requests)
 * [Pandas](https://github.com/pandas-dev/pandas)
-* [NumPy](https://github.com/numpy/numpy)
 * Datetime
 
 ## License
-[The Unlicense](https://github.com/JGolafshan/KenoAPI/blob/main/LICENSE)
+[BSD 3](https://github.com/JGolafshan/KenoAPI/blob/main/LICENSE)
+This software has been developed for educational use only. Use at your own risk.
 
 ## Documentation
 [Wiki / Documentation](https://github.com/JGolafshan/KenoAPI/wiki)
