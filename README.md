@@ -21,6 +21,7 @@ pip install kenoAPI
 
 ## License
 [BSD 3](https://github.com/JGolafshan/KenoAPI/blob/main/LICENSE)
+
 This software has been developed for educational use only. Use at your own risk.
 
 ## Documentation
