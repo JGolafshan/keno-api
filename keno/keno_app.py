@@ -169,7 +169,7 @@ class HistoricalData(KenoAPI):
 
     def recent_trends(self, look_back=None):
         current_game = RealTime(state=self.state).game_status().get("current_game")
-        get_date = current_game.get("starting_time").split(" ")[0]
+        get_date = datetime.datetime.now().strftime("%Y-%m-%d")
         get_game_number = current_game.get("game_number")
         start_game = get_game_number - look_back
 
@@ -177,9 +177,14 @@ class HistoricalData(KenoAPI):
                            additional_params="&starting_game_number={}&number_of_games={}&date={}&page_size=100&page_number=1").format(
             start_game, int(look_back), get_date)
         games_ = requests.get(url).json()
+        print(url)
 
-        self.__append_data(selected_data=games_)
-        return self.__df_conversion(selected_data=self.data)
+        if len(games_["items"]) == 0:
+            exit("Could Not find anything")
+
+        else:
+            self.data = self.__append_data(selected_data=games_)
+            return self.__df_conversion(selected_data=self.data)
 
     def historical_data(self):
         pass
@@ -212,4 +217,4 @@ class HistoricalData(KenoAPI):
 
 app = HistoricalData(state="nsw", start_date=None, end_date=None)
 
-pprint(app.recent_trends(look_back=10))
+print(app.recent_trends(look_back=5))
