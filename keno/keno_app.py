@@ -168,7 +168,7 @@ class HistoricalData(KenoAPI):
     # ------------- Callable Methods -------------
 
     def recent_trends(self, look_back=None):
-        current_game = RealTime(state="NSW").game_status().get("current_game")
+        current_game = RealTime(state=self.state).game_status().get("current_game")
         get_date = current_game.get("starting_time").split(" ")[0]
         get_game_number = current_game.get("game_number")
         start_game = get_game_number - look_back
