@@ -7,14 +7,14 @@ from pprint import pprint
 
 class KenoAPI:
     def __init__(self, state="NT"):
-        self.__state = state.upper()
-        self.__states = ["ACT", 'NSW', "QLD", "VIC", "WA", "NT", "SA", "TAS"]
-        self.__base_url = "https://api-info-{}.keno.com.au".format(self.__state_redirect__.lower())
+        self.__state__ = state.upper()
+        self.__states__ = ["ACT", 'NSW', "QLD", "VIC", "WA", "NT", "SA", "TAS"]
+        self.__base_url__ = "https://api-info-{}.keno.com.au".format(self.__state_redirect__.lower())
 
     def __get_url__(self, end_point="", additional_params=""):
         end_point = str(end_point)
         params = "?jurisdiction={}".format(self.__state_redirect__) + additional_params
-        complete_url = self.__base_url + end_point + params
+        complete_url = self.__base_url__ + end_point + params
 
         return str(complete_url)
 
@@ -23,21 +23,21 @@ class KenoAPI:
         # Checks state and redirect/ throw error if unavailable or in any way invalid.
 
         # Check if the state is value is found in the state list if it isn't throw an error and exit app
-        if any(x == self.__state for x in self.__states) is False:
-            return exit(str("Check state input: '{}' - is invalid").format(self.__state))
+        if any(x == self.__state__ for x in self.__states__) is False:
+            return exit(str("Check state input: '{}' - is invalid").format(self.__state__))
 
-        if self.__state.upper() == self.__states[4]:
+        if self.__state__.upper() == self.__states__[4]:
             print("Keno is not available in WA-Automatically changed to NSW")
-            self.__state = self.__states[2]
-            return self.__state
+            self.__state__ = self.__states__[2]
+            return self.__state__
 
-        if self.__state.upper() == self.__states[5] or self.__state.upper() == self.__states[6] \
-                or self.__state.upper() == self.__states[7]:
-            self.__state = self.__states[0]
-            return self.__state
+        if self.__state__.upper() == self.__states__[5] or self.__state__.upper() == self.__states__[6] \
+                or self.__state__.upper() == self.__states__[7]:
+            self.__state__ = self.__states__[0]
+            return self.__state__
 
         else:
-            return self.__state
+            return self.__state__
 
     # noinspection PyDefaultArgument
     @staticmethod
@@ -68,6 +68,10 @@ class KenoAPI:
     def __custom_range__(start, end, step):
         return range(start, end + 1, step)
 
+    @staticmethod
+    def __clamp__(n, minn, maxn):
+        return max(min(maxn, n), minn)
+
 
 class RealTime(KenoAPI):
     def __init__(self, state):
@@ -91,7 +95,7 @@ class RealTime(KenoAPI):
         }
 
         status = {
-            "state": self.__state,
+            "state": self.__state__,
             "current_game": status_current,
             "next_game": status_selling
         }
@@ -106,7 +110,7 @@ class RealTime(KenoAPI):
         status_type = status[-1]
 
         live_draw = {
-            "state": self.__state,
+            "state": self.__state__,
             "game_number": retrieved.get("game-number"),
             "status": status_type,
             "started_at": self.__transform_time__(_datetime=retrieved.get("closed")),
@@ -146,7 +150,7 @@ class RealTime(KenoAPI):
         }
 
         jackpot_combined = {
-            "state": self.__state,
+            "state": self.__state__,
             "regular": jackpot_regular,
             "leveraged": jackpot_leveraged
         }
@@ -161,12 +165,12 @@ class RealTime(KenoAPI):
         hot_cold = {"cold": retrieved.get("coldNumbers"),
                     "hot": retrieved.get("hotNumbers"),
                     "last_updated": retrieved.get("secondsSinceLastReceived"),
-                    "state": self.__state}
+                    "state": self.__state__}
         return hot_cold
 
     def __results_selection__(self, initial_draw=1, total_draws=1, start_date="2021-02-08",
                               page_size=1, page_number=1):
-        # game_number Max: 999
+        # game_number Max: 9999
         # Number of Games: Min:1, Max:200
         # page_size: Min:1, Max:200
         # page_number: Min:1, Max:100
@@ -220,24 +224,21 @@ class RealTime(KenoAPI):
 
         while timestamp <= end_date:
             base_test = self.__results_narrowed__(str(timestamp))
+
             if base_test.get("increase") is False and base_test.get("retry_at") > base_test.get("initial_draw"):
                 base_test["date"] -= datetime.timedelta(days=1)
                 base_test["start"] = 999 - (base_test.get("retry_at") + base_test.get("initial_draw"))
 
             else:
                 base_test["start"] = base_test.get("retry_at") + base_test.get("initial_draw")
-            print(base_test)
 
-            for num in self.__custom_range__(0, 540, 180):
-                if num + base_test.get("start") >= 999:
+            for num in self.__custom_range__(0, 999, 180):
+                if (num + base_test.get("start")) >= 999:
                     num = (num + base_test.get("start")) - 999
 
-                returned_data = self.__results_selection__(base_test.get("start") + num, 180,
+                returned_data = self.__results_selection__(self.__clamp__(base_test.get("start") + num, 0, 999), 180,
                                                            base_test.get("date").strftime("%Y-%m-%d"), 180, 1)
-
                 results.append(returned_data)
 
-            # Last thing this loop does
             timestamp += datetime.timedelta(days=1)
-
         return results
