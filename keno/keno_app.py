@@ -5,7 +5,7 @@ import pandas as pd
 from pprint import pprint
 
 
-class KenoAPI:
+class KenoBase:
     def __init__(self, state="NT"):
         self.__state__ = state.upper()
         self.__states__ = ["ACT", 'NSW', "QLD", "VIC", "WA", "NT", "SA", "TAS"]
@@ -73,9 +73,85 @@ class KenoAPI:
         return max(min(maxn, n), minn)
 
 
-class RealTime(KenoAPI):
+class KenoAPI(KenoBase):
     def __init__(self, state):
         super().__init__(state)
+
+    def __results_selection__(self, initial_draw=1, total_draws=1, start_date="2021-02-08",
+                              page_size=1, page_number=1):
+        # game_number Max: 9999
+        # Number of Games: Min:1, Max:200
+        # page_size: Min:1, Max:200
+        # page_number: Min:1, Max:100
+        url = self.__get_url__(end_point="/v2/info/history", additional_params="&starting_game_number={}&number_of_"
+                                                                               "games={}&date={}&page_size={"
+                                                                               "}&page_number={}").format(
+            initial_draw, total_draws, start_date, page_size, page_number)
+        return dict(requests.get(url).json())
+
+    def __results_narrowed__(self, date):
+        number = 100
+        increase = bool
+        found = False
+
+        while found is False:
+            try:
+                selection = self.__results_selection__(number, 1, date, 1, 1)
+                if "keno.game.complete" in selection.get("items")[0].get("_type"):
+                    found = True
+                    retrieved_date = self.__transform_time__(selection.get("items")[0].get("closed"))
+                    retrieved_date = datetime.datetime.strptime(retrieved_date, "%Y-%m-%d %H:%M:%S.%f")
+                    start_date = datetime.datetime.strptime(date, "%Y-%m-%d")
+
+                    # These two if statements check how many games we are from the first game
+                    if retrieved_date < start_date:
+                        time_delta = start_date - retrieved_date
+                        increase = True
+
+                    if retrieved_date > start_date:
+                        time_delta = retrieved_date - start_date
+                        increase = False
+
+                    return ({
+                        "date": datetime.datetime.strptime(date, "%Y-%m-%d").date(),
+                        "increase": increase,
+                        "initial_draw": number,
+                        "retry_at": round(time_delta / datetime.timedelta(seconds=160), 0),
+                        "start": 0
+                    })
+
+            except (IndexError, TypeError):
+                print(sys.exc_info())
+                number = number + 100
+                continue
+
+    def __data_frame__(self, keno_data):
+        pd.set_option('display.max_rows', 999999)
+        pd.set_option('display.max_columns', 999999)
+        pd.set_option('display.width', 999999)
+        list_result = []
+        for i in range(0, len(keno_data)):
+            for j in keno_data[i].get("items"):
+                list_result.append([
+                    j["game-number"], self.__transform_time__(j["closed"]),
+                    j["draw"][0], j["draw"][1], j["draw"][2], j["draw"][3], j["draw"][4], j["draw"][5], j["draw"][6],
+                    j["draw"][7], j["draw"][8], j["draw"][9], j["draw"][10], j["draw"][11], j["draw"][12],
+                    j["draw"][13],
+                    j["draw"][14], j["draw"][15], j["draw"][16], j["draw"][17], j["draw"][18], j["draw"][19],
+                    j["variants"]["heads-or-tails"]["result"],
+                    j["variants"]["heads-or-tails"]["heads"],
+                    j["variants"]["heads-or-tails"]["tails"],
+                    j["variants"]["roulette"],
+                    j["variants"]["bonus"]
+                ])
+
+        return pd.DataFrame(list_result,
+                            columns=["Game_Number", "Closed",
+                                     "Draw_1", "Draw_2", "Draw_3", "Draw_4", "Draw_5", "Draw_6", "Draw_7", "Draw_8",
+                                     "Draw_9",
+                                     "Draw_10", "Draw_11", "Draw_12", "Draw_13", "Draw_14", "Draw_15", "Draw_16",
+                                     "Draw_17",
+                                     "Draw_18", "Draw_19", "Draw_20", "Result", "Heads", "Tails", "Roulette", "Bonus"])
 
     def game_status(self):
         # Gets current and next game status and returns them as a nested dict.
@@ -168,54 +244,6 @@ class RealTime(KenoAPI):
                     "state": self.__state__}
         return hot_cold
 
-    def __results_selection__(self, initial_draw=1, total_draws=1, start_date="2021-02-08",
-                              page_size=1, page_number=1):
-        # game_number Max: 9999
-        # Number of Games: Min:1, Max:200
-        # page_size: Min:1, Max:200
-        # page_number: Min:1, Max:100
-        url = self.__get_url__(end_point="/v2/info/history", additional_params="&starting_game_number={}&number_of_"
-                                                                               "games={}&date={}&page_size={"
-                                                                               "}&page_number={}").format(
-            initial_draw, total_draws, start_date, page_size, page_number)
-        return dict(requests.get(url).json())
-
-    def __results_narrowed__(self, date):
-        number = 100
-        increase = bool
-        found = False
-
-        while found is False:
-            try:
-                selection = self.__results_selection__(number, 1, date, 1, 1)
-                if "keno.game.complete" in selection.get("items")[0].get("_type"):
-                    found = True
-                    retrieved_date = self.__transform_time__(selection.get("items")[0].get("closed"))
-                    retrieved_date = datetime.datetime.strptime(retrieved_date, "%Y-%m-%d %H:%M:%S.%f")
-                    start_date = datetime.datetime.strptime(date, "%Y-%m-%d")
-
-                    # These two if statements check how many games we are from the first game
-                    if retrieved_date < start_date:
-                        time_delta = start_date - retrieved_date
-                        increase = True
-
-                    if retrieved_date > start_date:
-                        time_delta = retrieved_date - start_date
-                        increase = False
-
-                    return ({
-                        "date": datetime.datetime.strptime(date, "%Y-%m-%d").date(),
-                        "increase": increase,
-                        "initial_draw": number,
-                        "retry_at": round(time_delta / datetime.timedelta(seconds=160), 0),
-                        "start": 0
-                    })
-
-            except (IndexError, TypeError):
-                # print(sys.exc_info())
-                number = number + 100
-                continue
-
     def historical_draws(self, start_date, end_date):
         start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
         end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -241,4 +269,4 @@ class RealTime(KenoAPI):
                 results.append(returned_data)
 
             timestamp += datetime.timedelta(days=1)
-        return results
+        return self.__data_frame__(keno_data=results)
