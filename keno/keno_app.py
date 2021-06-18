@@ -1,8 +1,6 @@
 import datetime
 import requests
-import sys
 import pandas as pd
-from pprint import pprint
 
 
 class KenoBase:
@@ -121,7 +119,6 @@ class KenoAPI(KenoBase):
                     })
 
             except (IndexError, TypeError):
-                print(sys.exc_info())
                 number = number + 100
                 continue
 

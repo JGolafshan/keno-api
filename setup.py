@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="kenoAPI",
-    version="2.0.0",
+    version="4.0.0",
     author="Joshua David Golafshan",
     description="Python-based API used to fetch real-time and historical data from the Australian Keno website.",
     # long_description=long_description,
     # long_description_content_type="text/markdown",
     url="https://github.com/JGolafshan/KenoAPI",
-    keywords=["keno API", "keno", "algo", "algobetting"],
+    keywords=["keno API", "keno", "algo", "algobetting", "API", "betting"],
     packages=["keno"],
     install_requires=[
         'datetime',
