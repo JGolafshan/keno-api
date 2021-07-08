@@ -33,5 +33,6 @@ This software has been developed for educational use only. Use at your own risk.
   * Import
   * Change return to yield
 * Fix historial Data issues
+* Different time zones are not taken into account
 
 
