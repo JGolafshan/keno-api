@@ -27,3 +27,11 @@ This software has been developed for educational use only. Use at your own risk.
 
 ## Documentation
 [Wiki / Documentation](https://github.com/JGolafshan/KenoAPI/wiki)
+
+## TODO
+* Optimizse 
+  * Import
+  * Change return to yield
+* Fix historial Data issues
+
+
