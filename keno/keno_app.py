@@ -1,6 +1,8 @@
 import sys
 import requests
 import dateutil
+from flatten_dict import flatten
+
 
 class KenoAPI:
     """
@@ -12,14 +14,14 @@ class KenoAPI:
         self._state = state.upper()
         self._states = ["ACT", "NSW", "QLD", "VIC", "WA", "NT", "SA", "TAS"]
         self._base_url = f"https://api-info-{self._state_redirect.lower()}.keno.com.au"
-    
+
     def _get_url(self, end_point="", additional_params=""):
         """
         Private Method:
         concatenates the base URL and the endpoint together along with additional parameters
         """
         end_point = str(end_point)
-        params = f"?jurisdiction={self._state_redirect}"+ additional_params
+        params = f"?jurisdiction={self._state_redirect}" + additional_params
         complete_url = self._base_url + end_point + params
 
         return complete_url
@@ -41,20 +43,12 @@ class KenoAPI:
         redirect = [self._states[5], self._states[6], self._states[7]]
 
         if any(x == self._state for x in redirect):
-            print(f"Keno is not available in '{self._state}', this state uses ACT ")
+            print(
+                f"Keno is not available in '{self._state}', this state uses ACT ")
             self._state = self._states[0]
             return self._state
 
         return self._state
-
-    # noinspection PyDefaultArgument
-    @staticmethod
-    def _nested_dict(key=dict, additional_key=""):
-        """
-        Private Method:
-            this function speeds up the look up times for nested dictionaries
-        """
-        return key.get(additional_key)
 
     def _transform_time(self, _datetime):
         '''
@@ -65,7 +59,8 @@ class KenoAPI:
         '''
         return dateutil.parser.isoparse(_datetime).strftime("%Y-%m-%d %H:%M:%S.%f")
 
-    def _results_selection(self, initial_draw=1, total_draws=1, start_date="2021-02-08", page_size=1, page_number=1):
+    def _results_selection(self, initial_draw=1, total_draws=1,
+                           start_date="2021-02-08", page_size=1, page_number=1):
         """
         Private Method:
 
@@ -73,7 +68,8 @@ class KenoAPI:
             total_draws: how many games you want to select
             start_date: which date you would like to get the games from
             page_size: how many games are on each page
-            page_number: if you page size is less then the total draws the games will be split amount multiple pages
+            page_number: if you page size is less then the total draws the
+                        games will be split amount multiple pages
 
             Min adn Max values for a each parameter
             game_number: Min: 0, Max: 999
@@ -86,8 +82,11 @@ class KenoAPI:
         """
 
         url = self._get_url(end_point="/v2/info/history",
-                            additional_params=f"&starting_game_number={initial_draw}&number_of_games={total_draws}&date={start_date}&page_size={page_size}&page_number={page_number}")
-        return dict(requests.get(url).json())
+        additional_params=f"&starting_game_number={initial_draw}&number_of_games={total_draws}&date={start_date}&page_size={page_size}&page_number={page_number}")
+        with requests.get(url) as response:
+            response.raise_for_status()
+            retrieved = response.json()
+            return retrieved
 
     def game_status(self):
         """
@@ -95,27 +94,12 @@ class KenoAPI:
             Desc: Retrieves information about the current and next game
         """
         url = self._get_url(end_point="/v2/games/kds", additional_params="")
-        retrieved = dict(requests.get(url).json())
-
-        status_current = {
-            "starting_time": self._transform_time(
-                _datetime=self._nested_dict(key=retrieved.get("current"), additional_key="closed")),
-            "game_number": self._nested_dict(key=retrieved.get("current"), additional_key="game-number")
-        }
-
-        status_selling = {
-            "starting_time": self._transform_time(
-                _datetime=self._nested_dict(key=retrieved.get("selling"), additional_key="closing")),
-            "game_number": self._nested_dict(key=retrieved.get("selling"), additional_key="game-number")
-        }
-
-        status = {
-            "state": self._state,
-            "current_game": status_current,
-            "next_game": status_selling
-        }
-
-        return status
+        with requests.get(url) as response:
+            response.raise_for_status()
+            retrieved = response.json()
+            # we move jackpots because it is just bloating the dict.
+            del retrieved["selling"]["jackpots"]
+            return flatten(retrieved, reducer="underscore")
 
     def live_draw(self):
         """
@@ -123,75 +107,46 @@ class KenoAPI:
             Desc: Retrieves data from the current draw
         """
         url = self._get_url(end_point="/v2/games/kds", additional_params="")
-        retrieved = dict(requests.get(url).json().get("current"))
-        status = str(retrieved.get("_type")).split(".")
-        status_type = status[-1]
-
-        live_draw = {
-            "state": self._state,
-            "game_number": retrieved.get("game-number"),
-            "status": status_type,
-            "started_at": self._transform_time(_datetime=retrieved.get("closed")),
-            "is_finished": None,
-            "draw_numbers": retrieved.get("draw"),
-            "bonus": self._nested_dict(retrieved.get("variants"), additional_key="bonus"),
-            "heads": self._nested_dict(retrieved.get("variants"), additional_key="heads-or-tails")["heads"],
-            "tails": self._nested_dict(retrieved.get("variants"), additional_key="heads-or-tails")["tails"],
-            "result": self._nested_dict(retrieved.get("variants"), additional_key="heads-or-tails")["result"]
-        }
-
-        if retrieved.get("_type") == "application/vnd.tabcorp.keno.game.complete":
-            live_draw.update({"is_finished": bool(True)})
-
-        else:
-            live_draw.update({"is_finished": bool(False)})
-
-        return live_draw
+        with requests.get(url) as response:
+            response.raise_for_status()
+            retrieved = response.json()
+            # we move jackpots because it is just bloating the dict.
+            del retrieved["selling"]["jackpots"]
+            return flatten(retrieved, reducer="underscore")
 
     def jackpot(self):
         """
         Public Method:
             Desc: Retrieves MegaMillions(leveraged) and Regular jackpots
         """
-        url = self._get_url(
-            end_point="/v2/info/jackpots", additional_params="")
-        retrieved = dict(requests.get(url).json())["jackpots"]
+        url = self._get_url(end_point="/v2/info/jackpots",
+                            additional_params="")
+        with requests.get(url) as response:
+            response.raise_for_status()
+            retrieved = response.json()
+            retrieved = flatten(retrieved, reducer="underscore")
 
-        jackpot_regular = {
-            "ten_spot": self._nested_dict(key=retrieved.get("ten-spot"), additional_key="base"),
-            "nine_spot": self._nested_dict(key=retrieved.get("nine-spot"), additional_key="base"),
-            "eight_spot": self._nested_dict(key=retrieved.get("eight-spot"), additional_key="base"),
-            "seven_spot": self._nested_dict(key=retrieved.get("seven-spot"), additional_key="base")
-        }
+            # Delete the the next value as we only want the current value.
+            remove = [
+                "jackpots_ten-spot-mm_next", "jackpots_ten-spot_next",
+                "jackpots_nine-spot-mm_next", "jackpots_nine-spot_next",
+                "jackpots_eight-spot-mm_next", "jackpots_eight-spot_next",
+                "jackpots_seven-spot-mm_next", "jackpots_seven-spot_next",
+                "jackpots_zero-spot-mm_base", "jackpots_zero-spot-mm_next",
+                "jackpots_zero-spot_base", "jackpots_zero-spot_next"
+            ]
 
-        jackpot_leveraged = {
-            "ten_spot": self._nested_dict(key=retrieved.get("ten-spot-mm"), additional_key="base"),
-            "nine_spot": self._nested_dict(key=retrieved.get("nine-spot-mm"), additional_key="base"),
-            "eight_spot": self._nested_dict(key=retrieved.get("eight-spot-mm"), additional_key="base"),
-            "seven_spot": self._nested_dict(key=retrieved.get("seven-spot-mm"), additional_key="base")
-        }
-
-        jackpot_combined = {
-            "state": self._state,
-            "regular": jackpot_regular,
-            "leveraged": jackpot_leveraged
-        }
-
-        return jackpot_combined
+            for i in remove:
+                del retrieved[i]
+            return retrieved
 
     def hot_cold(self):
         """
         Public Method:
             Desc: Retrieves trending numbers which is defined the the official keno
         """
-        url = self._get_url(
-            end_point="/v2/info/hotCold", additional_params="")
-        retrieved = dict(requests.get(url).json())
-
-        hot_cold = {
-            "cold": retrieved.get("coldNumbers"),
-            "hot": retrieved.get("hotNumbers"),
-            "last_updated": retrieved.get("secondsSinceLastReceived"),
-            "state": self._state
-        }
-        return hot_cold
+        url = self._get_url(end_point="/v2/info/hotCold", additional_params="")
+        with requests.get(url) as response:
+            response.raise_for_status()
+            retrieved = response.json()
+            return retrieved
