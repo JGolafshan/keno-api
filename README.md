@@ -1,4 +1,4 @@
-# Keno API - Unofficial Keno API
+# keno-api - Unofficial Keno API
 
 ## What is it?
 kenoAPI is Python package that provides data from the offical [Keno](https://www.keno.com.au/) website.
