@@ -51,12 +51,12 @@ class KenoAPI:
         return self._state
 
     def _transform_time(self, _datetime):
-        '''
+        """
         Private Method:
-            Transforms a date in a datetime object with the correct 
+            Transforms a date in a datetime object with the correct
             time information, it also factors in daylight savings
             currently working on adding tz and dst to this function
-        '''
+        """
         return dateutil.parser.isoparse(_datetime).strftime("%Y-%m-%d %H:%M:%S.%f")
 
     def _results_selection(self, initial_draw=1, total_draws=1,
@@ -82,7 +82,9 @@ class KenoAPI:
         """
 
         url = self._get_url(end_point="/v2/info/history",
-        additional_params=f"&starting_game_number={initial_draw}&number_of_games={total_draws}&date={start_date}&page_size={page_size}&page_number={page_number}")
+                            additional_params=f"""&starting_game_number={initial_draw}&
+                            number_of_games={total_draws}&date={start_date}&
+                            page_size={page_size}&page_number={page_number}""")
         with requests.get(url) as response:
             response.raise_for_status()
             retrieved = response.json()
@@ -146,6 +148,17 @@ class KenoAPI:
             Desc: Retrieves trending numbers which is defined the the official keno
         """
         url = self._get_url(end_point="/v2/info/hotCold", additional_params="")
+        with requests.get(url) as response:
+            response.raise_for_status()
+            retrieved = response.json()
+            return retrieved
+
+    def trends(self):
+        """
+        Public Method:
+            Desc: Retrieves the most recent 8 games from the state.
+        """
+        url = self._get_url(end_point="/v2/info/trends", additional_params="")
         with requests.get(url) as response:
             response.raise_for_status()
             retrieved = response.json()
