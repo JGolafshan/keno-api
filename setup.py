@@ -17,6 +17,8 @@ setuptools.setup(
         'datetime',
         'pandas',
         'requests',
+        'flatten-dict',
+        'dateutil',
     ],
     package_dir=setuptools.find_packages(),
     classifiers=[
