@@ -81,9 +81,8 @@ class KenoAPI:
         """
 
         url = self._get_url(end_point="/v2/info/history",
-                            additional_params=f"""&starting_game_number={initial_draw}&
-                            number_of_games={total_draws}&date={start_date}&
-                            page_size={page_size}&page_number={page_number}""")
+                            additional_params=f"""&starting_game_number={initial_draw}&number_of_games={total_draws}&date={start_date}&page_size={page_size}&page_number={page_number}""")
+        print(url)
         with requests.get(url) as response:
             response.raise_for_status()
             retrieved = response.json()
