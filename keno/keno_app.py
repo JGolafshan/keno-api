@@ -1,6 +1,5 @@
 import sys
 import requests
-import dateutil
 from flatten_dict import flatten
 
 
@@ -57,7 +56,7 @@ class KenoAPI:
             time information, it also factors in daylight savings
             currently working on adding tz and dst to this function
         """
-        return dateutil.parser.isoparse(_datetime).strftime("%Y-%m-%d %H:%M:%S.%f")
+        return None
 
     def _results_selection(self, initial_draw=1, total_draws=1,
                            start_date="2021-02-08", page_size=1, page_number=1):
@@ -137,7 +136,6 @@ class KenoAPI:
                 "jackpots_zero-spot-mm_base", "jackpots_zero-spot-mm_next",
                 "jackpots_zero-spot_base", "jackpots_zero-spot_next"
             ]
-
             for i in remove:
                 del retrieved[i]
             return retrieved
@@ -163,3 +161,6 @@ class KenoAPI:
             response.raise_for_status()
             retrieved = response.json()
             return retrieved
+
+    def historical(self, start, end):
+        pass
