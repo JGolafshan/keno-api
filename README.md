@@ -4,9 +4,8 @@
 keno-api is a Python package that provides data from the official [Keno](https://www.keno.com.au/) website.
 
 ## Main Features
-* Historical Draws. (WIP)
+* Historical Draws.
 * Monitor Live Draws.
-* Keno Status.
 * Real-time Jackpot's.
 * Hot And Cold Numbers.
 
