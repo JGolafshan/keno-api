@@ -349,7 +349,3 @@ class KenoAPI:
                 unique_draws.append(item)
 
         return unique_draws
-
-
-x = KenoAPI(state="NSW").historical("2023-05-03", "2023-05-05")
-print(x)
